@@ -1,0 +1,10 @@
+#navbar-container
+{
+    display: flex;
+    justify-content: center;
+}
+
+#navbar
+{
+    display: inline-block;
+}
