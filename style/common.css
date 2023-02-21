@@ -68,3 +68,8 @@ body
     margin-top: 14%;
     margin-bottom: 14%;
 }
+
+#disqus_thread
+{
+    margin-top: 10%;
+}
