@@ -3,19 +3,6 @@ h1, h2, h3, h4, h5
     margin: 0;
 }
 
-body
-{
-    max-width: 500px;
-    margin: 0 auto;
-    margin-bottom: 5%;
-    margin-top: 5%;
-
-    
-    /* right: auto; */
-    /*padding-left: 10%; */
-    /* padding-right: 10%; */
-}
-
 #header
 {
     position: relative;
@@ -43,6 +30,12 @@ body
 
 body
 {
+    margin: 0 auto;
+    margin-bottom: 5%;
+    margin-top: 5%;
+    padding-left: 10%;
+    padding-right: 10%;
+
     background-color: rgb(44, 44, 44);
     color: white;
 }
@@ -72,4 +65,18 @@ body
 #disqus_thread
 {
     margin-top: 10%;
+}
+
+@media only screen and (min-width: 0px) and (max-width: 500px) {
+    body
+    {
+        width: 100%;
+    }    
+}
+ 
+@media only screen and (min-width:500px) {
+    body
+    {
+        max-width: 700px;
+    }
 }
