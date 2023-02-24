@@ -78,16 +78,35 @@ int main()
 
         <h3> Code breakdown: </h3>
 
-        <img class="image" src="/images/chapter_1/breakdown_1.png" alt="">
-        <p>We do some error handling, initialize the window management library, GLFW</p>
+<pre><code class="code language-cpp">void glfwErrorCallback ( int code, const char* description )
+{
+    std::cout << "GLFW Error " << code << ": " << description << std::endl;
+}
 
-        <img class="image" src="/images/chapter_1/breakdown_2.png" alt="">
+int main()
+{
+    glfwSetErrorCallback ( glfwErrorCallback );
+    glfwInit ();</pre></code>
+    
+        <p>We do some error handling, initialize the window management library, GLFW</p>
+    
+<pre><code class="code language-cpp">GLFWwindow* window = glfwCreateWindow ( 1000, 800, "ScreenSaver", nullptr, nullptr );</pre></code>
         <p>It will be a fixed sized window named ScreenSaver</p>
 
-        <img class="image" src="/images/chapter_1/breakdown_3.png" alt="">
+<pre><code class="code language-cpp">glfwMakeContextCurrent ( window );
+gladLoadGL ();</code></pre>
+
         <p>We want to be able to draw to this window with OpenGL. So we do some initialization for that</p>
 
-        <img class="image" src="/images/chapter_1/breakdown_4.png" alt="">
+<pre><code class="code language-cpp">while ( ! glfwWindowShouldClose ( window ) )
+{
+    glClearColor ( 0, 0, 0, 1 );
+    glClear ( GL_COLOR_BUFFER_BIT );
+
+    glfwSwapBuffers ( window );
+    glfwPollEvents ();
+}</code></pre>
+
         <p>
             Main loop. it runs repeatedly until the user presses the close button,
             and now just clears the screen and handles input ( like close button press )
