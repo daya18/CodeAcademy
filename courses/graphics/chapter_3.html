@@ -57,7 +57,24 @@
         
         <p>
             OpenGL can take a callback to be called when an error happens. Let's define ours.
-            <img class="image" src="/images/chapter_3/Callback.png" alt="">
+            
+<pre><code class="code language-cpp">void debugMessageCallback ( GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam )
+{
+    std::string type_string =
+        type == GL_DEBUG_TYPE_ERROR ? "Error"
+        : type == GL_DEBUG_TYPE_PERFORMANCE ? "Performance"
+        : type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR ? "Undefined Behaviour" : "Unknown type";
+
+    std::cerr << "OpenGL " << type_string << ": " << message << std::endl;
+}</code></pre>
+
+            <!-- <img class="image" src="/images/chapter_3/Callback.png" alt=""> -->
             It just prints the message, With severity converted to string
         </p>
     </div>
@@ -72,10 +89,11 @@
             An OpenGL context is created behind the scenes when we create a window.
             So before creating the window, we set a GLFW hint.
         </p>
-        <img class="image" src="/images/chapter_3/DebugContext.png" alt="">
-
-        <p>Then we enable debug output, and make it use our callback function</p>
-        <img class="image" src="/images/chapter_3/EnableDebugOutput.png" alt="">
+<pre><code class="code language-cpp">glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE );</code></pre>
+        
+        <p>Then we enable debug output, and make OpenGL use our callback function</p>
+<pre><code class="code language-cpp">glEnable ( GL_DEBUG_OUTPUT );
+glDebugMessageCallback ( debugMessageCallback, nullptr );</code></pre>
 
     </div>
     
