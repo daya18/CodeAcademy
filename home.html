@@ -1,15 +1,13 @@
-
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 
 <html>
-    <head>
+    <head>        
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
         <script src="https://code.jquery.com/jquery-3.6.3.slim.min.js" integrity="sha256-ZwqZIVdD3iXNyGHbSYdsmWP//UBokj2FHAxKuSBKDSo=" crossorigin="anonymous"></script>
-        
-        <link rel="stylesheet" href="/style/index.css">
 
+        
         <!-- Font, Chakra Petch -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,58 +27,40 @@
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4050875591366893"
         crossorigin="anonymous"></script>
 
+        <link rel="stylesheet" href="/style/home.css">
     </head>
 
     <body>
-        <section id="intro-container">
-            <div id="site-heading">CodeSmithAcademy</div>
+        <nav>
+            <div id="nav-title">CodesmithAcademy</div>
             
-            <div id="intro-about-container">
-                <div id="intro-big-text">Learn by doing projects</div>
-                <div id="intro-details">Because that is the best, and most fun way to learn</div>
+            <div id="nav-buttons">
+                <button class="btn btn-success">About Us</button>  
             </div>
+        </nav>
 
-            <div id="scroll-down-container">
-                <a href="#content" id="scroll-down-button"><i class="bi bi-chevron-down"></i></a>
-            </div>
-        </section>
-
-        
         <div id="content">
-            <div id="courses-heading">Courses</div>
             
-            <div id="courses-container">
-                
-                <!-- <div id="courses"> -->
-
-                    <a href="/courses/graphics/chapter_1.html" class="course-container">
-                        <img src="/images/home/pexels-magda-ehlers-1340388.jpg" class="course-image">
-                        <div class="course-title"> C++ OpenGL Graphics </div>
-                    </a>
-<!-- 
-                    <div class="course-container">
-                        <div class="course-title"> One of three columns </div>
-                    </div>
-                    
-                    <div class="course-container">
-                        <div class="course-title"> One of three columns </div>
-                    </div>
-
-                    <div class="course-container">
-                        <div class="course-title"> One of three columns </div>
-                    </div>
-
-                    <div class="course-container">
-                        <div class="course-title"> One of three columns </div>
-                    </div>
-                    
-                    <div class="course-container">
-                        <div class="course-title"> One of three columns </div>
-                    </div> -->
-
-                <!-- </div> -->
+            <div id="introduction-panel" class="panel">
+                <p>Welcome to a series of blogs made for learning different applications of programming by doing projects</p>
+                <p>We hope you'll enjoy it!</p>
             </div>
-
+            
+            <div id="courses-panel" class="panel">
+                <div id="courses-heading">Courses</div>
+                
+                <div id="courses">
+                    <a class="course" href="/courses/graphics/chapter_1.html">
+                        <img class="course-image" src="/images/home/pexels-magda-ehlers-1340388.jpg" alt="">
+                        
+                        <div class="course-info">
+                            <div class="course-title">Graphics</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
         </div>
+
     </body>
 </html>
