@@ -4,7 +4,7 @@
 
     <!--- basic page needs
     ================================================== -->
-    <title>OpenGL Error Handling</title>
+    <title>How to create a vertex buffer in OpenGL</title>
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,7 +153,7 @@
                             <header class="entry__header">
     
                                 <h1 class="entry__title">
-                                    OpenGL Error Handling
+                                    How to Create a Vertex Buffer in OpenGL
                                 </h1>
 
                                 <div class="entry__meta">
@@ -193,69 +193,64 @@
 
                                 <div class="entry__content">
                                     <p class="drop-cap">
-                                        Before we begin, let's just quickly setup OpenGL error handling,
-                                        so we get errors printed to the console instead of, well, nothing.
-                                        just a black screen with no clue of what is wrong
+                                        A vertex buffer holds vertices in GPU's memory, and can be accessed to render, 
+                                        in our case a triangle.
+                                    </p>
+
+                                    <p>
+                                        Let's create ours, and fill it with our vertices.
                                     </p>
                                     
-                                    <div class="section">
-                                        <h3>Callback:</h3>
-                                        
-                                        <p>
-                                            OpenGL can take a callback to be called when an error happens. Let's define ours.
-                                            
-<pre><code class="code language-cpp">void debugMessageCallback ( GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    GLsizei length,
-    const GLchar* message,
-    const void* userParam )
+                                    <h3>Implementation</h3>
+                                    
+                                    <img src="images/chapter4/illustration_1.png" 
+                                      sizes="(max-width: 2400px) 100vw, 2400px" alt="">
+
+                                    <p>
+                                        Let's make a function called "CreateVertexBuffer", 
+                                        that creates a vertex buffer, uploads our triangle's vertices to it, and returns it.
+                                    </p>
+                                    
+<pre><code class="code language-cpp">GLuint CreateVertexBuffer ()
 {
-    std::string type_string =
-        type == GL_DEBUG_TYPE_ERROR ? "Error"
-        : type == GL_DEBUG_TYPE_PERFORMANCE ? "Performance"
-        : type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR ? "Undefined Behaviour" : "Unknown type";
+    auto vertices = {
+        -0.5f, -0.5f,
+         0.0f,  0.5f,
+         0.5f, -0.5f
+    };
 
-    std::cerr << "OpenGL " << type_string << ": " << message << std::endl;
-}</code></pre>
-                                
-                                            <!-- <img class="image" src="/images/chapter_3/Callback.png" alt=""> -->
-                                            It just prints the message, With severity converted to string
-                                        </p>
-                                    </div>
-                                
-                                        <h3>Setup:</h3>
-                                
-                                        <p>We have multiple things to do, to get it to work.</p>
-                                        
-                                        <p>
-                                            First, we need to make GLFW create the OpenGL context in debug mode.
-                                            An OpenGL context is created behind the scenes when we create a window.
-                                            So before creating the window, we set a GLFW hint.
-                                        </p>
+    GLuint vertexBuffer;
+    glGenBuffers ( 1, &vertexBuffer );
+    glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );
+    glBufferData ( GL_ARRAY_BUFFER, sizeof ( float ) * vertices.size (), vertices.begin (), GL_STATIC_DRAW );
+    glBindBuffer ( GL_ARRAY_BUFFER, 0 );
+    return vertexBuffer;
+}
+</code></pre>
+                                    <p>
+                                        Here,
+                                        <ul>
+                                            <li>we first define the vertices in a list.</li> 
+                                            
+                                            <li>Then we call glGenBuffers to create 1 buffer, and store it's ID in the address of the vertexBuffer variable</li>
+                                            
+                                            <li>In OpenGL, we have to bind resources to locations, and refer to them later by the name of the location.
+                                                So we bind our vertex buffer to the GL_ARRAY_BUFFER target</li>
 
-<pre><code class="code language-cpp">glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE );</code></pre>
-                                        
-                                        <p>Then we enable debug output, and make OpenGL use our callback function</p>
+                                            <li>Now we set the buffer's data by referring to it by it's location ( GL_ARRAY_BUFFER ).
+                                                The last parameter of glBufferData is just a hint to OpenGL on how we are planning to use the buffer. 
+                                                GL_STATIC_DRAW just means we upload to it once, and draw from it every frame.</li>
+                                            
+                                            <li>And it is a good practice to unbind the buffer from the target, after we are done, by binding 0 to the target</li>
+                                        </ul>
+                                    </p>
 
-<pre><code class="code language-cpp">glEnable ( GL_DEBUG_OUTPUT );
-glDebugMessageCallback ( debugMessageCallback, nullptr );</code></pre>
-                                
-                                    
-                                        <h3>Testing:</h3>
-                                
-                                        <p>Now let's test it!</p>
-                                        <p>By seeing what happens if we delibrately make an error. The window clear function...</p>
-                                        <img class="image" src="images/chapter3/Test.png" alt="">
-                                        <p>Nice. now let's see what happens if we run it</p>
-                                        <img class="image" src="images/chapter3/TestResult.png" alt="">
-                                        <p>Perfect</p>
-                                        
-                                        <h4>Note:</h4>
-                                        <p>It is being printed every frame ( when the clear function is called )</p>
-                                
-                                    
+                                    <p>
+                                        That's it for creating a vertex buffer. we can now call it before entering the main loop, to create the buffer
+                                    </p>
+
+<pre><code class="code language-cpp">GLuint vertexBuffer = CreateVertexBuffer ();</code></pre>
+
                                     <div class="entry__author-box">
                                         <figure class="entry__author-avatar">
                                             <i class="avatar bi bi-person" style="font-size: 100px;""></i>
@@ -278,15 +273,15 @@ glDebugMessageCallback ( debugMessageCallback, nullptr );</code></pre>
 
                                 <div class="post-nav">
                                     <div class="post-nav__prev">
-                                        <a href="chapter2.html" rel="prev">
+                                        <a href="chapter3.html" rel="prev">
                                             <span>Prev</span>
-                                            How to draw a triangle - Overview 
+                                            OpenGL Error Handling 
                                         </a>
                                     </div>
                                     <div class="post-nav__next">
-                                        <a href="chapter4.html" rel="next">
+                                        <a href="chapter5.html" rel="next">
                                             <span>Next</span>
-                                            How to Create a Vertex Buffer
+                                            How To Create a Vertex Array
                                         </a>
                                     </div>
                                 </div>

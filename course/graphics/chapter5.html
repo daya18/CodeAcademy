@@ -4,7 +4,7 @@
 
     <!--- basic page needs
     ================================================== -->
-    <title>OpenGL Error Handling</title>
+    <title>How to create a vertex array in OpenGL</title>
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,7 +153,7 @@
                             <header class="entry__header">
     
                                 <h1 class="entry__title">
-                                    OpenGL Error Handling
+                                    How to Create a Vertex Array in OpenGL
                                 </h1>
 
                                 <div class="entry__meta">
@@ -193,69 +193,56 @@
 
                                 <div class="entry__content">
                                     <p class="drop-cap">
-                                        Before we begin, let's just quickly setup OpenGL error handling,
-                                        so we get errors printed to the console instead of, well, nothing.
-                                        just a black screen with no clue of what is wrong
+                                        Now that we have our vertices in a vertex buffer, we need to tell OpenGL how it is layed out.
+                                        that is, we have an array of floats, in which every 2 floats defines an attribute ( vertex position ),
+                                        and that the data comes from binding 0 of the vertex array, to which we'll bind the vertex buffer
                                     </p>
                                     
-                                    <div class="section">
-                                        <h3>Callback:</h3>
-                                        
-                                        <p>
-                                            OpenGL can take a callback to be called when an error happens. Let's define ours.
-                                            
-<pre><code class="code language-cpp">void debugMessageCallback ( GLenum source,
-    GLenum type,
-    GLuint id,
-    GLenum severity,
-    GLsizei length,
-    const GLchar* message,
-    const void* userParam )
+                                    <h3>Implementation</h3>
+                                    <p>
+                                        Let's make a function called "CreateVertexArray", 
+                                        that takes a vertex buffer, creates a vertex array, describes the format of vertex input,
+                                        and binds the vertex buffer to it.
+                                    </p>
+                                    
+<pre><code class="code language-cpp">GLuint CreateVertexArray ( GLuint vertexBuffer )
 {
-    std::string type_string =
-        type == GL_DEBUG_TYPE_ERROR ? "Error"
-        : type == GL_DEBUG_TYPE_PERFORMANCE ? "Performance"
-        : type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR ? "Undefined Behaviour" : "Unknown type";
+    GLuint vertexArray;
+    glGenVertexArrays ( 1, &vertexArray );
+    glBindVertexArray ( vertexArray );
+    
+    glEnableVertexAttribArray ( 0 );
+    glVertexAttribFormat ( 0, 2, GL_FLOAT, false, 0 );
+    glVertexAttribBinding ( 0, 0 );
 
-    std::cerr << "OpenGL " << type_string << ": " << message << std::endl;
+    glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( float ) * 2 );
+
+    glBindVertexArray ( 0 );
+    return vertexArray;
 }</code></pre>
-                                
-                                            <!-- <img class="image" src="/images/chapter_3/Callback.png" alt=""> -->
-                                            It just prints the message, With severity converted to string
-                                        </p>
-                                    </div>
-                                
-                                        <h3>Setup:</h3>
-                                
-                                        <p>We have multiple things to do, to get it to work.</p>
-                                        
-                                        <p>
-                                            First, we need to make GLFW create the OpenGL context in debug mode.
-                                            An OpenGL context is created behind the scenes when we create a window.
-                                            So before creating the window, we set a GLFW hint.
-                                        </p>
 
-<pre><code class="code language-cpp">glfwWindowHint ( GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE );</code></pre>
-                                        
-                                        <p>Then we enable debug output, and make OpenGL use our callback function</p>
+                                    <h3>Code Breakdown</h3>
 
-<pre><code class="code language-cpp">glEnable ( GL_DEBUG_OUTPUT );
-glDebugMessageCallback ( debugMessageCallback, nullptr );</code></pre>
-                                
+<pre><code class="code language-cpp">GLuint vertexArray;
+glGenVertexArrays ( 1, &vertexArray );
+glBindVertexArray ( vertexArray );</code></pre>
+
+                                    <p>We first create the vertex array in a similar way to vertex buffer, and bind it.</p>
                                     
-                                        <h3>Testing:</h3>
-                                
-                                        <p>Now let's test it!</p>
-                                        <p>By seeing what happens if we delibrately make an error. The window clear function...</p>
-                                        <img class="image" src="images/chapter3/Test.png" alt="">
-                                        <p>Nice. now let's see what happens if we run it</p>
-                                        <img class="image" src="images/chapter3/TestResult.png" alt="">
-                                        <p>Perfect</p>
-                                        
-                                        <h4>Note:</h4>
-                                        <p>It is being printed every frame ( when the clear function is called )</p>
-                                
+<pre><code class="code language-cpp">glEnableVertexAttribArray ( 0 );
+glVertexAttribFormat ( 0, 2, GL_FLOAT, false, 0 );
+glVertexAttribBinding ( 0, 0 );</code></pre>
+
+                                    <p>Then we enable attribute 0, and define it as having 2 floats, with it's data coming from the buffer bound to binding 0</p>
+    
+<pre><code class="code language-cpp">glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( float ) * 2 );</code></pre>
                                     
+                                    <p>And then we bind the buffer to binding 0</p>
+
+                                    <p>Now we can call the function to create our vertex array</p>
+
+<pre><code class="code language-cpp">GLuint vertexBuffer = CreateVertexBuffer ( vertexBuffer );</code></pre>
+
                                     <div class="entry__author-box">
                                         <figure class="entry__author-avatar">
                                             <i class="avatar bi bi-person" style="font-size: 100px;""></i>
@@ -278,17 +265,17 @@ glDebugMessageCallback ( debugMessageCallback, nullptr );</code></pre>
 
                                 <div class="post-nav">
                                     <div class="post-nav__prev">
-                                        <a href="chapter2.html" rel="prev">
+                                        <a href="chapter4.html" rel="prev">
                                             <span>Prev</span>
-                                            How to draw a triangle - Overview 
+                                            How to Create a Vertex Buffer 
                                         </a>
                                     </div>
-                                    <div class="post-nav__next">
-                                        <a href="chapter4.html" rel="next">
+                                    <!-- <div class="post-nav__next">
+                                        <a href="chapter2.html" rel="next">
                                             <span>Next</span>
-                                            How to Create a Vertex Buffer
+                                            How To Draw A Triangle - Overview
                                         </a>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                             </div> <!-- end content-primary -->
