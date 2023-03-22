@@ -4,7 +4,7 @@
 
     <!--- basic page needs
     ================================================== -->
-    <title>How to create a vertex buffer in OpenGL</title>
+    <title>Understanding Vertex Buffers and Vertex Arrays</title>
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,7 +153,7 @@
                             <header class="entry__header">
     
                                 <h1 class="entry__title">
-                                    How to Create a Vertex Buffer in OpenGL
+                                    Understanding Vertex Buffers and Vertex Arrays
                                 </h1>
 
                                 <div class="entry__meta">
@@ -193,19 +193,18 @@
 
                                 <div class="entry__content">
                                     <p class="drop-cap">
-                                        A vertex buffer holds vertices in GPU's memory, and can be accessed to render, 
-                                        in our case a triangle.
+                                        A vertex buffer holds vertices in GPU's memory, and can be accessed to render objects. 
+                                        In this tutorial, we'll create a basic triangle using a vertex buffer and vertex array.
                                     </p>
 
-                                    <p>
-                                        Let's create ours, and fill it with our vertices.
-                                    </p>
-                                    
-                                    <h3>Implementation</h3>
-                                    
-                                    <img src="images/chapter4/illustration_1.png" 
-                                      sizes="(max-width: 2400px) 100vw, 2400px" alt="">
+                                    <h3>Vertices of a triangle</h3>
 
+                                    <p>We can define a triangle by the positions of it's vertices, as shown below </p>
+                                    <img src="images/chapter4/illustration_1.png" sizes="(max-width: 2400px) 100vw, 2400px" alt="">
+                                    
+                                    <h3>Vertex Buffer</h3>
+
+                                    <h4>Function to create our vertex buffer</h4>
                                     <p>
                                         Let's make a function called "CreateVertexBuffer", 
                                         that creates a vertex buffer, uploads our triangle's vertices to it, and returns it.
@@ -213,7 +212,7 @@
                                     
 <pre><code class="code language-cpp">GLuint CreateVertexBuffer ()
 {
-    auto vertices = {
+    float vertices [] {
         -0.5f, -0.5f,
          0.0f,  0.5f,
          0.5f, -0.5f
@@ -222,34 +221,90 @@
     GLuint vertexBuffer;
     glGenBuffers ( 1, &vertexBuffer );
     glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );
-    glBufferData ( GL_ARRAY_BUFFER, sizeof ( float ) * vertices.size (), vertices.begin (), GL_STATIC_DRAW );
+    glBufferData ( GL_ARRAY_BUFFER, sizeof ( vertices ), vertices, GL_STATIC_DRAW );
     glBindBuffer ( GL_ARRAY_BUFFER, 0 );
     return vertexBuffer;
-}
-</code></pre>
-                                    <p>
-                                        Here,
-                                        <ul>
-                                            <li>we first define the vertices in a list.</li> 
-                                            
-                                            <li>Then we call glGenBuffers to create 1 buffer, and store it's ID in the address of the vertexBuffer variable</li>
-                                            
-                                            <li>In OpenGL, we have to bind resources to locations, and refer to them later by the name of the location.
-                                                So we bind our vertex buffer to the GL_ARRAY_BUFFER target</li>
+}</code></pre>
+                                    <h4>Understanding the CreateVertexBuffer function</h4>
 
-                                            <li>Now we set the buffer's data by referring to it by it's location ( GL_ARRAY_BUFFER ).
-                                                The last parameter of glBufferData is just a hint to OpenGL on how we are planning to use the buffer. 
-                                                GL_STATIC_DRAW just means we upload to it once, and draw from it every frame.</li>
-                                            
-                                            <li>And it is a good practice to unbind the buffer from the target, after we are done, by binding 0 to the target</li>
-                                        </ul>
-                                    </p>
+                                    <p>we first define the vertices in a list.</p>
+<pre><code class="code language-cpp">float vertices [] {
+    -0.5f, -0.5f,
+     0.0f,  0.5f,
+     0.5f, -0.5f
+};</code></pre>
 
-                                    <p>
-                                        That's it for creating a vertex buffer. we can now call it before entering the main loop, to create the buffer
-                                    </p>
+                                    <p>Then we call glGenBuffers to create 1 buffer, and store it's ID in the address of the vertexBuffer variable</p>
+<pre><code class="code language-cpp">glGenBuffers ( 1, &vertexBuffer );</code></pre>
 
+                                    <p>In OpenGL, we have to bind resources to locations, and refer to them later by the name of the location.
+                                        So we call glBindBuffer to bind our vertex buffer to the GL_ARRAY_BUFFER target</p>
+<pre><code class="code language-cpp">glBindBuffer ( GL_ARRAY_BUFFER, vertexBuffer );</code></pre>
+
+                                    <p>Now we set the buffer's data by referring to it by it's location ( GL_ARRAY_BUFFER ).
+                                        The last parameter of glBufferData is just a hint to OpenGL on how we are planning to use the buffer. 
+                                        GL_STATIC_DRAW just means we upload to it once, and draw from it every frame.</p>
+<pre><code class="code language-cpp">glBufferData ( GL_ARRAY_BUFFER, sizeof ( vertices ), vertices, GL_STATIC_DRAW );</code></pre>
+                                        
+                                    <p>And it is a good practice to unbind the buffer from the target, after we are done, by binding 0 to the target</p>
+<pre><code class="code language-cpp">glBindBuffer ( GL_ARRAY_BUFFER, 0 );</code></pre>
+                                    
+                                    <p>That's it for creating a vertex buffer. we can now call it before entering the main loop, to create the buffer</p>
 <pre><code class="code language-cpp">GLuint vertexBuffer = CreateVertexBuffer ();</code></pre>
+
+                                    <p>
+                                        Now that we have our vertices in a vertex buffer, we need to tell OpenGL how it is layed out.
+                                        that is, we have an array of floats, in which every 2 floats defines an attribute ( vertex position ),
+                                        and that the data comes from binding 0 of the vertex array, to which we'll bind the vertex buffer
+                                    </p>
+
+                                <h3>Vertex Array</h3>
+                                <h4>Function to Create our Vertex Array</h4>
+                                <p>
+                                    Let's make a function called "CreateVertexArray", 
+                                    that takes a vertex buffer, creates a vertex array, describes the format of vertex input,
+                                    and binds the vertex buffer to it.
+                                </p>
+
+<pre><code class="code language-cpp">GLuint CreateVertexArray ( GLuint vertexBuffer )
+{
+GLuint vertexArray;
+glGenVertexArrays ( 1, &vertexArray );
+glBindVertexArray ( vertexArray );
+
+glEnableVertexAttribArray ( 0 );
+glVertexAttribFormat ( 0, 2, GL_FLOAT, false, 0 );
+glVertexAttribBinding ( 0, 0 );
+
+glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( float ) * 2 );
+
+glBindVertexArray ( 0 );
+return vertexArray;
+}</code></pre>
+
+                                <p>We first create and bind the vertex array in the same way as vertex buffer, by calling a glGen... function, and glBind... to bind it</p>
+<pre><code class="code language-cpp">GLuint vertexArray;
+glGenVertexArrays ( 1, &vertexArray );
+glBindVertexArray ( vertexArray );</code></pre>
+
+
+                                <p>
+                                    Then we enable attribute 0 by calling glEnableVertexAttribArray,
+                                    and call glVertexAttribFormat to define attribute 0 as having 2 floats
+                                    then we call glVerrtexAttribBinding to specify that the data for attribute 0 comes 
+                                    from the buffer bound to binding 0
+                                </p>
+<pre><code class="code language-cpp">glEnableVertexAttribArray ( 0 );
+glVertexAttribFormat ( 0, 2, GL_FLOAT, false, 0 );
+glVertexAttribBinding ( 0, 0 );</code></pre>
+
+                                <p>Now we just bind the buffer to binding 0, with the proper stride.
+                                Stride means the size of a vertex.</p>
+<pre><code class="code language-cpp">glBindVertexBuffer ( 0, vertexBuffer, 0, sizeof ( float ) * 2 );</code></pre>
+
+
+                                <p>Now we can call the function to create our vertex array just like we did for vertex buffer.</p>
+<pre><code class="code language-cpp">GLuint vertexArray = CreateVertexArray ( vertexBuffer );</code></pre>
 
                                     <div class="entry__author-box">
                                         <figure class="entry__author-avatar">
@@ -281,7 +336,7 @@
                                     <div class="post-nav__next">
                                         <a href="chapter5.html" rel="next">
                                             <span>Next</span>
-                                            How To Create a Vertex Array
+                                            Creating a Basic Shader Program
                                         </a>
                                     </div>
                                 </div>
