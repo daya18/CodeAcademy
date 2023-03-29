@@ -4,7 +4,7 @@
 
     <!--- basic page needs
     ================================================== -->
-    <title>Creating a Basic Shader Program</title>
+    <title>Rendering a Triangle in OpenGL</title>
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,7 +153,7 @@
                             <header class="entry__header">
     
                                 <h1 class="entry__title">
-                                    Creating a Basic Shader Program
+                                    Rendering a Triangle in OpenGL
                                 </h1>
 
                                 <div class="entry__meta">
@@ -193,179 +193,23 @@
 
                                 <div class="entry__content">
                                     <p class="drop-cap">
-                                        As you may already know from the overview chapter, a shader program is just a program that runs in the GPU to render objects.
-                                        let's try to understand what a shader program really means, and create our own for the purpose of rendering our triangle.
-                                    </p>
+                                        Finally! Now that we have all pieces of the puzzle,
+                                        we can just bind the vertex array and shader program, 
+                                        and call glDrawArrays to render the triangle 
+                                    </p>                                    
+
+                                    <h3>Rendering</h3>
+                                
+<pre><code class="code language-cpp">glBindVertexArray ( vertexArray );
+glUseProgram ( shaderProgram );
+glDrawArrays ( GL_TRIANGLES, 0, 3 );</code></pre>                            
+
+
+                                    <p>glDrawArrays takes primitive type, first vertex, and the number of vertices.</p>
+
+                                    <p>If you did everything right, you should see a triangle when you run the program. like this:</p>
                                     
-                                    <h3>Graphics Pipeline</h3>
-                                    
-                                    <p>
-                                        A Graphics Pipeline takes our vertices ( from the vertex buffer ), and outputs a colored image. 
-                                        This process of creating an image from some numeric input data is called "Rendering".
-                                    </p>
-                                    
-                                    <img src="images/chapter5/Pipeline.png">
-                                    
-                                    <p>
-                                        There are many stages in a graphics pipeline, some programmable and some not.
-                                        The programmable stages are called "Shaders".
-                                        The most important stages in a graphics pipeline are vertex shader and fragment shader execution
-                                    </p>
-                                    
-                                    <img src="images/chapter5/PipelineWithStages.png">
-                                    
-                                    <p>
-                                        Both of these stages are programmable, and have specific tasks they perform. 
-                                        We need not know or understand the rest of the pipeline, for rendering a simple triangle.
-                                        Now let's try to understand vertex and fragment shaders
-                                    </p>
-                                    
-                                    <h3>Vertex Shader</h3>
-                                    
-                                    <p>
-                                        A vertex shader runs for each vertex.
-                                        It takes the vertex data and outputs new values for the vertex.
-                                        You maybe wondering how this will be useful. The image below should help 
-                                    </p>
-                                    
-                                    <img src="images/chapter5/VertexTransformation.png">
-                                    
-                                    <p>Moving objects!</p>
-                                    
-                                    <h3>Fragment Shader</h3>
-                                    <p>
-                                        After the vertex shader finishes running, 
-                                        OpenGL computes the pixels covered by the object, 
-                                        and calls the fragment shader for each of those pixels.
-                                        
-                                        The fragment shader outputs a color value for the pixel.
-                                    </p>
-                                    
-                                    <img src="images/chapter5/FragmentShader.png">
-                                    
-                                    <h3>Shader Program</h3>
-                                    <p>
-                                        A shader program is just a collection of shaders that can be bound, and used just like buffers.
-                                        Let's create a very basic shader program with just a vertex and fragment shader, for rendering our triangle.
-                                    </p>
-                                    
-                                    <h3>Shader Creation</h3>
-                                    <p>
-                                        We can either write the shader as a string, or read it in from a file.
-                                        Here, we'll read it from a file. Let's define a function to create a shader.
-                                    </p>
-
-<pre><code class="code language-cpp">GLint CreateShader ( std::string const & filePath, GLenum type )
-{
-    std::string shaderSource { ( std::ostringstream {} << std::ifstream { filePath }.rdbuf () ).str () };
-
-    GLint shader = glCreateShader ( type );
-
-    GLint size { shaderSource.size () };
-    GLchar * source { shaderSource.data () };
-    glShaderSource ( shader, 1, &source, &size );
-    
-    glCompileShader ( shader );
-    
-    return shader;
-}</code></pre>
-
-                                    <p>
-                                        Pretty straightforward except for a few things. 
-                                        The reading in from file part is just a compact way of reading ifstream's rdbuf to an ostringstream, 
-                                        and getting a string from it.
-                                    </p>
-
-                                    <p>Also note that glShaderSource can take multiple strings as sources</p>
-                                    
-                                    <h3>Shader program creation</h3>
-                                    <p>Now let's define a function to create a shader program from our vertex and fragment shaders</p>
-
-<pre><code class="code language-cpp">GLint CreateShaderProgram ()
-{
-	GLint vertexShader { CreateShader ( "shader/BasicShader.glsl.vert", GL_VERTEX_SHADER ) };
-	GLint fragmentShader { CreateShader ( "shader/BasicShader.glsl.frag", GL_FRAGMENT_SHADER ) };
-	
-	GLint program = glCreateProgram ();
-
-	glAttachShader ( program, vertexShader );
-	glAttachShader ( program, fragmentShader );
-
-	glLinkProgram ( program );
-
-	return program;
-
-	glDeleteShader ( vertexShader );
-	glDeleteShader ( fragmentShader );
-}</code></pre>
-                                    <p>
-                                        Easy! In this function, we create a shader program, attach vertex and fragment shaders, and link.
-                                        The shaders can be deleted after creating a program from them.
-                                    </p>                                
-                                    
-                                    <p>
-                                        Now let's call our new CreateShaderProgram function just before entering 
-                                        the main loop, to create our shader program.
-                                    </p>
-
-<pre><code class="code language-cpp">GLint shaderProgram = CreateShaderProgram ();</code></pre>                            
-
-                                    <p>
-                                        The vertex and fragment shader files dont exist yet. Let's create them now.
-                                        It is convention to name shader files in name.lang.stage format.
-                                        so our basic vertex shader file will be named BasicShader.glsl.vert,
-                                        and fragment shader will be in BasicShader.glsl.frag 
-                                    </p>
-                                    
-                                    <h3>OpenGL Shading Language</h3>
-                                    <p>
-                                        Also known as GLSL, is a C like language that OpenGL shaders are written in.
-                                        In addition to core concepts like functions and variables, 
-                                        it has built in vector and matrix types and layout qualifiers.
-                                        All glsl shaders have a main function, similar to C and C++.
-                                    </p>
-                                    
-                                    <p>Let us take a look at basic vertex and fragment shaders written in glsl</p>
-
-                                    <h3>Basic Vertex Shader</h3>
-
-<pre><code class="code language-glsl">#version 460
-
-layout ( location = 0 ) in vec2 position;
-
-void main ()
-{
-    gl_Position = vec4 ( position, 0.0f, 1.0f );
-}</code></pre>
-                                    <p>
-                                        Our vertex shader takes a vec2 ( 2 component vector ) called position from location 0, 
-                                        and assigns it as it is to gl_Position.
-                                        gl_Position is the built in variable that represents the vertex's new position
-                                        It has 4 components. The 4th component will just be 1 for our simple triangle.
-                                        This will be explained later.
-                                    </p>
-
-                                  <h3>Basic Fragment Shader</h3>
-
-<pre><code class="code language-glsl">#version 460
-
-layout ( location = 0 ) out vec4 color;
-
-void main ()
-{
-	color = vec4 ( 1, 1, 1, 1 );
-}</code></pre>
-
-                                    <p>
-                                        This is easy too. the fragment shader outputs a color value to location 0. 
-                                        color is output as a 4 component vector, for red, green, blue and alpha ( rgba ).
-                                    </p>
-
-                                    <p>
-                                        colors are floating point values from 0 to 1. 
-                                        Here, we are ouputting 1, 1, 1, 1, which is the rgba value for white.
-                                        So all our pixels will be white. in other words, it will render a white triangle
-                                    </p>
+                                    <img src="images/chapter6/Result.png">
 
                                     <div class="entry__author-box">
                                         <figure class="entry__author-avatar">
@@ -389,17 +233,17 @@ void main ()
 
                                 <div class="post-nav">
                                     <div class="post-nav__prev">
-                                        <a href="chapter4.html" rel="prev">
+                                        <a href="chapter5.html" rel="prev">
                                             <span>Prev</span>
-                                            Understanding Vertex Buffers and Vertex Arrays 
+                                            Creating a Basic Shader Program 
                                         </a>
                                     </div>
-                                    <div class="post-nav__next">
-                                        <a href="chapter6.html" rel="next">
+                                    <!-- <div class="post-nav__next">
+                                        <a href="chapter2.html" rel="next">
                                             <span>Next</span>
-                                            Rendering a Triangle in OpenGL
+                                            How To Draw A Triangle - Overview
                                         </a>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                             </div> <!-- end content-primary -->
