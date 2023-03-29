@@ -270,11 +270,15 @@
     return shader;
 }</code></pre>
 
+                                    <p>Pretty straightforward except for a few things.</p>
+                                    
                                     <p>
-                                        Pretty straightforward except for a few things. 
                                         The reading in from file part is just a compact way of reading ifstream's rdbuf to an ostringstream, 
-                                        and getting a string from it.
+                                        and getting a string from it. And since we are using ifstream and ostringstream, we need to include fstream and sstream headers
                                     </p>
+                                       
+<pre><code class="code language-cpp">#include &ltfstream&gt
+#include &ltsstream&gt</code></pre>
 
                                     <p>Also note that glShaderSource can take multiple strings as sources</p>
                                     
