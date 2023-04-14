@@ -199,6 +199,142 @@
 
                                 <div class="entry__content">
                                     <p class="drop-cap">
+                                        As the title says, This chapter is about rendering complex shapes like squares and circles.
+                                        We'll need that to make an interesting screensaver.
+                                    </p>
+                                    
+                                    <p>
+                                        Sorry for the delay in posting this chapter. i'll try to be more consistent from now.
+                                    </p>
+
+                                    <p>
+                                        This is supposed to be a project oriented series, but i never said what we'll really be making.
+                                        Our end goal is making a solar system screensaver, With planets rotating around the sun at different speeds.
+                                        It will have lighting and shadows too.
+                                    </p>
+                                    
+                                    <h3>Primitive types</h3>
+                                    <p>First, let's take a look at our draw call from the previous chapter.</p>
+<pre><code class="code language-cpp">glDrawArrays ( GL_TRIANGLES, 0, 3 );</code></pre>
+                                    <p>The first parameter is called mode, and we pass GL_TRIANGLES to it. but what does that really mean?</p>
+                                    <p>It means that OpenGL will interpret the list of vertices as a list of lists of vertices that make up a triangle. Something like</p>
+                                    <img src="images/chapter7/Triangles.png">
+                                    
+                                    <p>
+                                        There are other primitive types like line and point, but for anything more complex than triangle, 
+                                        we need to divide it into triangles, and use GL_TRIANGLES to draw it.
+                                    </p>
+                                    
+                                    <h3>Drawing a Square</h3>
+                                    <p>From the above, it is obvious how to draw a square.</p>
+                                    <img src="images/chapter7/Square.png">
+
+                                    <h3>Implementing Square Rendering</h3>
+                                    <p>
+                                        To actually do this ( rendering a square ) in our project, 
+                                        we basically just modify the vertices in the vertex buffer
+                                    </p>
+
+<pre><code class="code language-cpp">GLuint CreateVertexBuffer ()
+{
+	float vertices [] {
+		-0.5f, -0.5f,
+		-0.5f, 0.5f,
+		0.5f, -0.5f,
+		0.5f, -0.5f,
+		-0.5f, 0.5f,
+		0.5f, 0.5f,
+    };</code></pre>
+                                    <p>And modify vertex count in the draw call, because we now have 6 vertices in total</p>
+<pre><code class="code language-cpp">glDrawArrays ( GL_TRIANGLES, 0, 6 );</code></pre>
+
+                                    <h3>Result</h3>
+                                    <img src="images/chapter7/Result.png">
+                                    
+                                    <p>
+                                        It is not a square because our window isn't a square, and the vertices are in clip space.
+                                        In clip space, -1 and 1 are mapped to min and max window edges along x and y respectively.
+                                    </p>
+                                    
+                                    <p>
+                                        We generally dont specify vertices in clip space, 
+                                        but use a projection matrix to get the vertices to the right clip space coordinates, 
+                                        correcting for window aspect ratio
+                                    </p>
+
+                                    <p>We'll go in depth on this later, but for now, let's just make our window square, and move on to the next sub topic</p>
+<pre><code class="code language-cpp">GLFWwindow* window = glfwCreateWindow ( 800, 800, "ScreenSaver", nullptr, nullptr );</code></pre>
+
+                                    <h3>The Duplicate Vertex Problem</h3>
+                                    <p>
+                                        If we go back and think about what we just did, we gave OpenGL 6 vertices, to draw 2 triangles that make up a square.
+                                        But a square just has 4 unique vertices, And our list of 6 vertices has 2 unnecessary duplicates.
+                                    </p>
+                                    
+                                    <img src="images/chapter7/DuplicateVertices.png">
+
+                                    <p>
+                                        This is not much of a problem in a simple square, but it will be, for more complex shapes like a low poly horse.
+                                        And vertices normally dont just have positions but texture coordinates, normals and much more. 
+                                        So duplicating an entire vertex can be a problem worth solving
+                                    </p>
+                                    
+                                    <h3>Solving the Duplicate Vertex Problem</h3>
+                                    <p>As someone said, all problems in computer science can be solved by another level of indirection.</p>
+                                    <p>Introducing..... Index Buffers!</p>
+                                    
+                                    <p>
+                                        The essence of the concept is, having a list of indices into the vertex buffer, in an index buffer. 
+                                        So instead of duplicating whole vertices, we just duplicate single numbers
+                                    </p>
+                                    
+                                    <img src="images/chapter7/VertexIndexing.png">
+
+                                    <p>
+                                        The indices are stored in an "Index Buffer". Creating it is exactly similar to vertex buffer creation, 
+                                        except the bind point being GL_ELEMENT_ARRAY_BUFFER.
+                                    </p>
+                                    
+                                    <p>Let's first set the new vertices</p>
+<pre><code class="code language-cpp">GLuint CreateVertexBuffer ()
+{
+	float vertices [] {
+		-0.5f, -0.5f,
+		-0.5f, 0.5f,
+		0.5f, 0.5f,
+		0.5f, -0.5f,
+	};</code></pre>
+
+                                    <p>Now let's define a function to create the index buffer</p>
+<pre><code class="code language-cpp">GLuint CreateIndexBuffer ()
+{
+	uint32_t indices [] {
+		0, 1, 3, 3, 1, 2
+	};
+
+	GLuint indexBuffer;
+	glGenBuffers ( 1, &indexBuffer );
+	glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+	glBufferData ( GL_ELEMENT_ARRAY_BUFFER, sizeof ( indices ), indices, GL_STATIC_DRAW );
+	glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	return indexBuffer;
+}</code></pre>
+
+                                    <p>Now we can create an index buffer, by calling this function after creating vertex buffer</p>
+<pre><code class="code language-cpp">GLuint indexBuffer = CreateIndexBuffer ();</code></pre>
+
+                                    <p>
+                                        For indexed drawing, we use the glDrawElements function, instead of glDrawArrays.
+                                        glDrawElements takes mode, count, type, and offset.
+                                        offset is a pointer that is interpreted as an integer due to legacy compatibility....
+                                    </p>
+
+<pre><code class="code language-cpp">glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+glDrawElements ( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );</code></pre>
+
+                                    <p>
+                                        That's it. if you run the program now, you should see a square. nothing new visually
+                                        We'll render a circle in the next chapter, but that is it for now
                                     </p>
 
                                     <div class="entry__author-box">
@@ -223,17 +359,18 @@
 
                                 <div class="post-nav">
                                     <div class="post-nav__prev">
-                                        <a href="chapter5.html" rel="prev">
+                                        <a href="chapter6.html" rel="prev">
                                             <span>Prev</span>
-                                            Creating a Basic Shader Program 
+                                            Rendering a Triangle in OpenGL 
                                         </a>
                                     </div>
-                                    <!-- <div class="post-nav__next">
-                                        <a href="chapter2.html" rel="next">
+
+                                    <div class="post-nav__next">
+                                        <a href="chapter8.html" rel="next">
                                             <span>Next</span>
-                                            How To Draw A Triangle - Overview
+                                            Rendering a circle
                                         </a>
-                                    </div> -->
+                                    </div>
                                 </div>
 
                             </div> <!-- end content-primary -->
