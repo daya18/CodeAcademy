@@ -4,12 +4,12 @@
 
     <!--- basic page needs
     ================================================== -->
-    <title>Creating a window for graphics rendering</title>
+    <title>Making The Window Resizable</title>
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="In this chapter, we'll create a window, and write a basic event loop">
-    <meta name="keywords" content="C++, Graphics, OpenGL, Window">
+    <meta name="description" content="Let's see how we can render more complex objects than a triangle">
+    <meta name="keywords" content="C++, Graphics, OpenGL, Index, Vertex, Buffer, Shapes, Circle">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
@@ -93,6 +93,7 @@
                             <a href="../../courses.html" title="" class="">Courses</a>
                             <ul class="sub-menu">
                                 <li><a href="introduction.html">Graphics</a></li>
+
                             </ul>
                         </li>
                         <li class="current-menu-item has-children">
@@ -158,7 +159,7 @@
                             <header class="entry__header">
     
                                 <h1 class="entry__title">
-                                    Computer graphics using C++
+                                    Making The Window Resizable
                                 </h1>
 
                                 <div class="entry__meta">
@@ -174,7 +175,7 @@
                                             <circle cx="12" cy="12" r="7.25" stroke="currentColor" stroke-width="1.5"></circle>
                                             <path stroke="currentColor" stroke-width="1.5" d="M12 8V12L14 14"></path>
                                         </svg>
-                                        March 5, 2023 
+                                        April 25, 2023 
                                     </div>
                                     <div class="entry__meta-cat">
                                         <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -197,103 +198,150 @@
                             <div class="content-primary">
 
                                 <div class="entry__content">
-                                    <p class="lead">
-                                        <p class="drop-cap">
-                                            Welcome to my blog series on computer graphics with C++ and OpenGL! 
-                                            Whether you're a beginner or an experienced programmer, 
-                                            this series is designed to help you learn how to create 
-                                            stunning 3D graphics and animations using industry-standard tools and techniques.
-                                        </p>
+                                    <p class="lead">If you try resizing the window now, it will behave weirdly.</p>
+                                    
+                                    <p class="drop-cap">In this chapter, we'll be implementing proper window resize handling.</p>
+                                    
+                                    <p>First, we need to setup a system to know when the window size changes.</p>
 
-                                        <p>
-                                            Throughout this series, we'll cover the fundamentals of computer graphics, including how to
-                                            render 3D objects, apply textures and lighting, and implement advanced techniques like shadow
-                                            mapping. We'll also explore the basics of OpenGL, one of the most widely-used graphics APIs,
-                                            and how to use it to create powerful and dynamic graphics applications.
-                                        </p>
+                                    <h3>Setting Up The Callback</h3>
+                                    <p>
+                                        GLFW can take a framebuffer resize callback that is called when the window resizes.
+                                        it should be defined like this:
+                                    </p>
 
-                                        <p>
-                                            By the end of this series, you'll have a solid understanding of the key concepts and tools used
-                                            in modern computer graphics programming, as well as the ability to apply this knowledge to 
-                                            create your own amazing graphics projects. So whether you're looking to build your own games, 
-                                            create stunning visualizations, or simply learn more about the exciting world of computer graphics, 
-                                            this series is for you!
-                                        </p>
-                
-                                        <h3>Prerequisites</h3>
-                
-                                        <ol>
-                                            <li>A reasonably modern computer that supports OpenGL, C++ compiler and ide</li>
-                                            
-                                            <li>Libraries
-                                                <ul>
-                                                    <li>GLAD ( OpenGL loader library )</li>
-                                                    <li>GLM ( Math library )</li>
-                                                    <li>GLFW ( Window creation library )</li>
-                                                </ul>
-                                            </li>
-                                        </ol>
-                                        <p>
-                                            <h3>Setting up the project:</h3>
-                                            You can either create a basic C++ project by yourself, and include all the required libraries, or use the provided starter project
-                                        </p>
+<pre><code class="code language-cpp">void FramebufferSizeCallback ( GLFWwindow * window, int width, int height )
+{
+}</code></pre>
+                                    
+                                    <p>
+                                        Now to set this as glfw's framebuffer size callback for the window, 
+                                        we call glfwSetFramebufferSizeCallback after creating the window
+                                    </p>
 
-                                        <p>
-                                            <h3>Using the provided starter project:</h3>
-                                            <a href="https://drive.google.com/file/d/1NB8xI-WMyZwcTlv774SyPN2z0UV_NU8c/view?usp=share_link">StartupProject.zip</a>
-                                            <h4>Visual Studio 2017+</h4>
-                                            <ol>
-                                                <li>Extract the StarterProject zip file</li>
-                                                <li>open it in visual studio</li>
-                                            </ol>
+<pre><code class="code language-cpp">glfwSetFramebufferSizeCallback ( window, FramebufferSizeCallback );</code></pre>
+                                    
+                                    <h3>Updating Viewport</h3>
+                                    
+                                    <p>In this callback, we'll update viewport by calling glViewport.</p>
 
-                                            <h4>CMake Command Line:</h4>
-                                            <ol>
-                                                <li>Extract the StarterProject zip file</li>
-                                                <li>Open the extracted folder</li>
-                                                <li>Create a build folder</li>
-                                                <li>Open terminal here</li>
-                                                <li>To Build: type "cmake --build .." from the build folder</li>
-                                            </ol>
-                                        </p>
-                                        
-                                        <p>
-                                            Now you should be ready to start!
-                                        </p>
+                                    <p>
+                                        The viewport is the area in the window that OpenGL renders to.
+                                        When the OpenGL context is created, it sets viewport to the current window size.
+                                        But it does not implicitly detect window resizing and change viewport accordingly.
+                                        It instead expects the user ( us ) to set the viewport with the glViewport function, whenever window size changes.
+                                    </p>
+                                    
+                                    <p>
+                                        The glViewport function takes 4 parameters specifying the viewport's position and edges in pixels.
+                                        here, we want the position ( lower left corner of the viewport rectangle ) to be 0, 
+                                        and width and height equal to the window's width and height.
+                                    </p>
+                                    
+<pre><code class="code language-cpp">glViewport ( 0, 0, width, height );</code></pre>
+                                    
+                                    <p>
+                                        The expected behaviour at this point is the circle scaling with window resize. 
+                                        but if you played with the window, you might've noticed that it only scales when the mouse button is released.
+                                        This is due to the fact that glfwPollEvents blocks till the mouse button is released, 
+                                        and only calls the framebuffer size callback when dragged.
+                                    </p>
 
-                                        <div class="entry__author-box">
-                                            <figure class="entry__author-avatar">
-                                                <i class="avatar bi bi-person" style="font-size: 100px;""></i>
-                                            </figure>
-                                            <div class="entry__author-info">
-                                                <h5 class="entry__author-name">
-                                                    <a href="#0">
-                                                        Daya
-                                                    </a>
-                                                </h5>
-                                                <p>
-                                                Daya is a programmer with passion for graphics. 
-                                                with 5+ years of experience in C++ and Graphics,
-                                                They've made various personal projects like games and game engines 
-                                                </p>
-                                            </div>
+                                    <h3>Making The Window Dynamically Resize</h3>
+
+                                    <p>
+                                        We can make the window dynamically resize as the user drags, 
+                                        by just rendering after setting viewport, in the framebuffer resize callback.
+                                        First, we refactor rendering code into a function, and call it on framebuffer resize 
+                                        in addition to in the main loop.
+                                    </p>
+
+                                    <p>This is the rendering part.</p>
+                                    
+<pre><code class="code language-cpp">glClearColor ( 0, 0, 0, 1 );
+glClear ( GL_COLOR_BUFFER_BIT );
+
+glBindVertexArray ( vertexArray );
+glUseProgram ( shaderProgram );
+glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+glDrawElements ( GL_TRIANGLES, vertexCount * 3, GL_UNSIGNED_INT, 0 );
+
+glfwSwapBuffers ( window );</code></pre>
+
+                                    <p>
+                                        If we just moved this to a function, the vertex array, shader program and index buffer should be taken as parameter or globals.
+                                        To keep things simple, and because it will work, we'll bind them in main, before entering the loop.
+                                    </p>
+
+                                    <p>In the render function,</p>
+<pre><code class="code language-cpp">void Render ( GLFWwindow * window )
+{
+    glClearColor ( 0, 0, 0, 1 );
+    glClear ( GL_COLOR_BUFFER_BIT );
+
+    glDrawElements ( GL_TRIANGLES, vertexCount * 3, GL_UNSIGNED_INT, 0 );
+
+    glfwSwapBuffers ( window );
+}</code></pre>
+
+                                    <p>Now the main loop will just call this.</p>
+<pre><code class="code language-cpp">while ( ! glfwWindowShouldClose ( window ) )
+{
+    Render ( window );
+    glfwPollEvents ();
+}</code></pre>
+
+                                    <p>And the framebuffer size callback will look like</p>
+
+<pre><code class="code language-cpp">void FramebufferSizeCallback ( GLFWwindow * window, int width, int height )
+{
+	glViewport ( 0, 0, width, height );
+	Render ( window );
+}</code></pre>
+
+                                    <p>
+                                        That's it. We made it so that the window now properly resizes dynamically.
+                                        There is still a problem that needs fixing, the circle scaling non uniformly.
+                                        We'll do that in a later chapter as it is a bit advanced.
+                                    </p>
+                                    
+                                    <h3>Author's Note</h3>
+                                    <p>I just realized that having the code at the end of each chapter will be really useful. That will come soon.</p>
+                                    <p>I'd like to hear your suggestions, and i will consider them. So please use the comments section below to express yourself</p>
+
+                                    <div class="entry__author-box">
+                                        <figure class="entry__author-avatar">
+                                            <i class="avatar bi bi-person" style="font-size: 100px;""></i>
+                                        </figure>
+                                        <div class="entry__author-info">
+                                            <h5 class="entry__author-name">
+                                                <a href="#0">
+                                                    Daya
+                                                </a>
+                                            </h5>
+                                            <p>
+                                            Daya is a programmer with passion for graphics. 
+                                            with 5+ years of experience in C++ and Graphics,
+                                            They've made various personal projects like games and game engines 
+                                            </p>
                                         </div>
+                                    </div>
 
                                 </div> <!-- end entry-content -->
 
                                 <div class="post-nav">
-                                    <!-- <div class="post-nav__prev">
-                                        <a href="single-standard.html" rel="prev">
+                                    <div class="post-nav__prev">
+                                        <a href="chapter8.html" rel="prev">
                                             <span>Prev</span>
-                                            The Pomodoro Technique Really Works. 
-                                        </a>
-                                    </div> -->
-                                    <div class="post-nav__next">
-                                        <a href="chapter1.html" rel="next">
-                                            <span>Next</span>
-                                            Creating a window for rendering graphics.
+                                            Rendering Circles 
                                         </a>
                                     </div>
+                                    <!-- <div class="post-nav__next">
+                                        <a href="chapter2.html" rel="next">
+                                            <span>Next</span>
+                                            How To Draw A Triangle - Overview
+                                        </a>
+                                    </div> -->
                                 </div>
 
                             </div> <!-- end content-primary -->
@@ -304,6 +352,28 @@
                 </div> <!-- end entry-wrap -->
         </section> <!-- end s-content -->
 
+        <!-- Disqus -->
+        <div id="disqus_thread"></div>
+                
+        <script>
+            /**
+            *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+            *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+            
+            // var disqus_config = function () {
+            // this.page.url = "/courses/graphics/chapter_1.html";  // Replace PAGE_URL with your page's canonical URL variable
+            // this.page.identifier = "graphics_chapter_1"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+            // };
+            
+            (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://codeacademy-1.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <!------------>
 
         <!-- # site-footer
         ================================================== -->
